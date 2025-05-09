@@ -1,0 +1,279 @@
+:root {
+    --primary-color: #007bff; 
+    --primary-color-dark: #0056b3;
+    --secondary-color: #6c757d; 
+    --light-gray: #f8f9fa;
+    --medium-gray: #e9ecef;
+    --dark-gray: #343a40;
+    --text-color: #212529;
+    --border-color: #dee2e6;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --white-color: #ffffff;
+  
+    --font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  
+    --border-radius: 0.375rem; /* 6px */
+    --spacing-xs: 0.25rem; /* 4px */
+    --spacing-sm: 0.5rem;  /* 8px */
+    --spacing-md: 1rem;    /* 16px */
+    --spacing-lg: 1.5rem;  /* 24px */
+    --spacing-xl: 2rem;    /* 32px */
+  
+    --transition-speed: 0.2s;
+  }
+  
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  html {
+    font-size: 16px; /* Base font size */
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    font-family: var(--font-family-sans-serif);
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: var(--light-gray);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  #root {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  
+  /* --- App Container --- */
+  .app-container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: var(--spacing-lg) var(--spacing-md);
+    width: 100%;
+  }
+  
+  /* --- Typography --- */
+  h1, h2, h3, h4, h5, h6 {
+    margin-bottom: var(--spacing-md);
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--dark-gray);
+  }
+  
+  h1 {
+    font-size: 2.25rem; /* 36px */
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+  }
+  
+  h2 {
+    font-size: 1.75rem; /* 28px */
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: var(--spacing-sm);
+    margin-top: var(--spacing-xl);
+  }
+  
+  h3 {
+    font-size: 1.5rem; /* 24px */
+  }
+  
+  p {
+    margin-bottom: var(--spacing-md);
+  }
+  
+  a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color var(--transition-speed) ease-in-out;
+  }
+  
+  a:hover {
+    color: var(--primary-color-dark);
+    text-decoration: underline;
+  }
+  
+  /* --- Form Elements (UploadArea) --- */
+  .upload-area-container {
+    background-color: var(--white-color);
+    padding: var(--spacing-xl);
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    text-align: center;
+    border: 1px solid var(--border-color);
+  }
+  
+  .upload-area-container label {
+    display: block;
+    font-size: 1.125rem; /* 18px */
+    margin-bottom: var(--spacing-md);
+    color: var(--dark-gray);
+    font-weight: 500;
+  }
+  
+  input[type="file"] {
+    display: none;
+  }
+  
+  .upload-button {
+    display: inline-block;
+    background-color: var(--primary-color);
+    color: var(--white-color);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 1rem; /* 16px */
+    font-weight: 500;
+    border: none;
+    transition: background-color var(--transition-speed) ease-in-out, transform var(--transition-speed) ease;
+  }
+  
+  .upload-button:hover {
+    background-color: var(--primary-color-dark);
+    transform: translateY(-2px);
+  }
+  
+  .upload-button:disabled {
+    background-color: var(--secondary-color);
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  .file-info,
+  .loading-message {
+    margin-top: var(--spacing-md);
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+  }
+  
+  /* --- Error Message --- */
+  .error-message {
+    background-color: #ffebee; /* Light red */
+    color: var(--danger-color);
+    border: 1px solid var(--danger-color);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius);
+    margin-top: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    text-align: center;
+  }
+  
+  .error-message p {
+    margin: 0;
+  }
+  
+  /* --- Pie Chart Display --- */
+  .pie-chart-container {
+    background-color: var(--white-color);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin-top: var(--spacing-xl);
+    border: 1px solid var(--border-color);
+  }
+  
+  .pie-chart-container h3 {
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+  }
+  
+  .recharts-responsive-container {
+    margin: 0 auto; /* Center the chart if it doesn't fill width */
+  }
+  
+  /* Styling for Recharts Tooltip */
+  .recharts-default-tooltip {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--border-radius) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    padding: var(--spacing-sm) !important;
+  }
+  
+  .recharts-tooltip-label {
+    font-weight: bold !important;
+    color: var(--dark-gray) !important;
+    margin-bottom: var(--spacing-xs) !important;
+  }
+  
+  .recharts-tooltip-item {
+    color: var(--text-color) !important;
+  }
+  
+  /* Styling for Recharts Legend */
+  .recharts-legend-wrapper {
+    padding-top: var(--spacing-md) !important;
+  }
+  
+  .recharts-legend-item {
+    margin-right: var(--spacing-md) !important;
+    font-size: 0.9rem; /* 14px */
+  }
+  
+  .recharts-surface { /* The colored square/circle in legend */
+    margin-right: var(--spacing-xs) !important;
+  }
+  
+  .total-deductions-text {
+    text-align: center;
+    margin-top: var(--spacing-lg);
+    font-weight: bold;
+    font-size: 1.125rem;
+    color: var(--dark-gray);
+  }
+  
+  /* --- Placeholder Text --- */
+  .placeholder-text {
+    text-align: center;
+    color: var(--secondary-color);
+    margin-top: var(--spacing-xl);
+    font-style: italic;
+  }
+  
+  /* --- Responsive Adjustments --- */
+  @media (max-width: 768px) {
+    h1 {
+      font-size: 1.8rem; /* 28.8px */
+    }
+  
+    h2 {
+      font-size: 1.5rem; /* 24px */
+    }
+  
+    .app-container {
+      padding: var(--spacing-md);
+    }
+  
+    .upload-area-container,
+    .pie-chart-container {
+      padding: var(--spacing-lg);
+    }
+  
+    /* Make Recharts legend items stack vertically on smaller screens if needed */
+    .recharts-legend-wrapper ul {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .recharts-legend-item {
+      margin-bottom: var(--spacing-xs);
+    }
+  }
+  
+  @media (max-width: 480px) {
+    html {
+      font-size: 15px;
+    }
+    .upload-button {
+      width: 100%;
+      padding: var(--spacing-md);
+    }
+  }

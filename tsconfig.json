@@ -1,21 +1,34 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "useDefineForClassFields": true,
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    "allowJs": false,
-    "skipLibCheck": true,
-    "esModuleInterop": false,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "module": "ESNext",
-    "moduleResolution": "Node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "react-jsx"
+    // --- Core Settings (Mostly Unchanged) ---
+    "target": "ESNext", // Keep using modern JavaScript features
+    "useDefineForClassFields": true, // Standard class field behavior
+    "lib": ["DOM", "DOM.Iterable", "ESNext"], // Standard libraries for web + modern JS
+    "jsx": "react-jsx", // Use modern React JSX transform
+    "module": "ESNext", // Let the bundler (Vite) handle final module format
+    "strict": true, // Keep strict type checking enabled (good!)
+    "forceConsistentCasingInFileNames": true, // Good practice
+    "resolveJsonModule": true, // Allow importing JSON files
+    "isolatedModules": true, // Often required by bundlers like Vite
+    "noEmit": true, // Let the bundler handle generating JS files
+
+    // --- Key Changes/Recommendations ---
+    "moduleResolution": "bundler", // <--- CHANGE 1: Align with modern bundler behavior (like Vite)
+                                    // Alternatives if 'bundler' doesn't work: "NodeNext", or back to "node"
+
+    "esModuleInterop": true, // <--- KEEP: Important for compatibility with different module types
+    "allowSyntheticDefaultImports": true, // Works with esModuleInterop
+
+    "skipLibCheck": false, // <--- CHANGE 2 (Temporary Debugging): Force TS to check library types fully.
+                           // This *might* surface hidden issues in pdfjs-dist's types.
+                           // Can slow down type checking. Set back to 'true' later for performance.
+
+    // --- Optional: Define Base URL (Unlikely to help this specific issue, but common) ---
+    // "baseUrl": ".", // Tells TS the root for non-relative paths (usually project root)
+    // "paths": {       // Example of path aliases, not needed for node_modules resolution
+    //   "@/*": ["src/*"]
+    // }
   },
-  "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": ["src"], // Process files only in the 'src' directory
+  "references": [{ "path": "./tsconfig.node.json" }] // Keep this if you are using Vite (references config for vite.config.ts etc.)
 }
