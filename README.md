@@ -68,6 +68,4 @@ The application follows a component-based architecture typical of React applicat
 
 ### User Story
 
-**As a new resident in Germany,
-**I want to upload my "Lohnsteuerbescheinigung" (annual tax certificate) PDF,
-**So that I can quickly see a visual breakdown of my gross income, taxes, and social security contributions, helping me understand where my money goes and verify the details on my official documents.
+As a new resident in Germany, I want to upload my "Lohnsteuerbescheinigung" (annual tax certificate) PDF, So that I can quickly see a visual breakdown of my gross income, taxes, and social security contributions, helping me understand where my money goes and verify the details on my official documents.
