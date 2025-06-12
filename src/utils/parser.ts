@@ -1,6 +1,6 @@
 import * as pdfjs from 'pdfjs-dist';
 const { getDocument, GlobalWorkerOptions } = pdfjs;
-const pdfjsVersion = '3.11.174'; // Your specified version
+const pdfjsVersion = '3.11.174'; 
 GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsVersion}/pdf.worker.min.js`;
 
 export interface PayslipItem {
@@ -8,43 +8,37 @@ export interface PayslipItem {
   amount: number;
 }
 
-// Category mapping - CRITICAL: Keys must EXACTLY match text in your PDF's fullText output
+
 const categoryMapping: { [key: string]: string } = {
     '3. Bruttoarbeitslohn einschl. Sachbezüge': 'Gross Salary',
     '4. Einbehaltene Lohnsteuer von 3.': 'Income Tax',
-    '5. Einbehaltener Solidaritätszuschlag von 3.': 'Solidarity Surcharge', // Will be "------- --" in your test PDF
-    '6. Einbehaltene Kirchensteuer des Arbeitnehmers von 3.': 'Church Tax', // Will be "------- --" in your test PDF
-    '22. Arbeitgeber- Anteil/ -Zuschuss a) zur gesetzlichen Rentenversicherung': 'Employer Pension Contribution', // Blank in your test PDF
-    '23. Arbeitnehmer- anteil a) zur gesetzlichen Rentenversicherung': 'Pension Insurance', // Blank in your test PDF
-    '25. Arbeitnehmerbeiträge zur gesetzlichen Krankenversicherung': 'Health Insurance', // Blank in your test PDF
-    '26. Arbeitnehmerbeiträge zur sozialen Pflegeversicherung': 'Nursing Care Insurance', // Blank in your test PDF
-    '27. Arbeitnehmerbeiträge zur Arbeitslosenversicherung': 'Unemployment Insurance', // Blank in your test PDF
+    '5. Einbehaltener Solidaritätszuschlag von 3.': 'Solidarity Surcharge', 
+    '6. Einbehaltene Kirchensteuer des Arbeitnehmers von 3.': 'Church Tax', 
+    '22. Arbeitgeber- Anteil/ -Zuschuss a) zur gesetzlichen Rentenversicherung': 'Employer Pension Contribution', 
+    '23. Arbeitnehmer- anteil a) zur gesetzlichen Rentenversicherung': 'Pension Insurance', 
+    '25. Arbeitnehmerbeiträge zur gesetzlichen Krankenversicherung': 'Health Insurance',
+    '26. Arbeitnehmerbeiträge zur sozialen Pflegeversicherung': 'Nursing Care Insurance', 
+    '27. Arbeitnehmerbeiträge zur Arbeitslosenversicherung': 'Unemployment Insurance', 
     '28. Beiträge zur privaten Kranken- und Pflege-Pflicht- versicherung oder Mindestvorsorgepauschale': 'Private Health/Nursing Insurance',
 };
 
-/**
- * Parses EUR and Ct string parts into a single numerical value.
- * Returns 0 if input is a placeholder like "-------" or invalid.
- */
 function parseGermanAmount(eurString: string | undefined, ctString: string | undefined): number {
-    // If eurString itself is the placeholder "-------" or similar, it's 0.
     if (!eurString || eurString.trim().startsWith('-')) {
         return 0;
     }
     try {
         const cleanedEurString = eurString.replace(/\./g, ''); // "1.234" -> "1234"
         const eurValue = parseFloat(cleanedEurString);
-        // If ctString is placeholder "--" or missing, treat as 0 cents.
         const ctValue = (ctString && !ctString.trim().startsWith('-') && ctString.trim() !== "") ? parseFloat(ctString) : 0;
 
         if (isNaN(eurValue) || isNaN(ctValue)) {
             console.warn(`parseGermanAmount: Failed to parse numbers: EUR='${eurString}', Ct='${ctString}'`);
-            return 0; // Treat parsing failure as 0 for this context
+            return 0; 
         }
-        return Math.abs(eurValue + (ctValue / 100)); // Return absolute value
+        return Math.abs(eurValue + (ctValue / 100)); 
     } catch (error) {
         console.error(`parseGermanAmount: Error for EUR='${eurString}', Ct='${ctString}'`, error);
-        return 0; // Treat error as 0
+        return 0; 
     }
 }
 
@@ -69,15 +63,12 @@ async function parseLohnsteuerbescheinigung(pdfContent: ArrayBuffer): Promise<Pa
                 fullText += ' PAGE_BREAK ';
             }
         }
-        fullText = fullText.replace(/\s+/g, ' ').trim(); // Normalize all whitespace
+        fullText = fullText.replace(/\s+/g, ' ').trim(); 
 
         console.log("--- parseLohnsteuerbescheinigung: EXTRACTED PDF TEXT (Normalized Single Line) ---");
         console.log(fullText); // Log the entire fullText for debugging
         console.log("---------------------------------------------------------------------------------");
 
-        // Regex to find EUR and Ct values.
-        // Group 1: EUR part (numbers OR 3+ dashes for placeholders like "-------")
-        // Group 2: Ct part (1-2 numbers OR 2 dashes for placeholders like "--")
         const amountPairRegex = /((?:\d{1,3}(?:\.\d{3})*|\d+)|-{3,})\s+((?:\d{1,2})|-{2})\b/;
 
         for (const [keywordPhrase, mappedCategory] of Object.entries(categoryMapping)) {
@@ -93,30 +84,24 @@ async function parseLohnsteuerbescheinigung(pdfContent: ArrayBuffer): Promise<Pa
 
                 console.log(`Found Keyword "${keywordPhrase}". Searching for amount in window [${keywordEndIndex}-${keywordEndIndex + MAX_CHARS_TO_SEARCH_FOR_AMOUNT}]: "${textToSearchForAmount.substring(0, Math.min(textToSearchForAmount.length, 70))}..."`);
 
-                const amountMatchResult = amountPairRegex.exec(textToSearchForAmount); // Apply regex to the window
+                const amountMatchResult = amountPairRegex.exec(textToSearchForAmount); 
 
                 if (amountMatchResult && amountMatchResult[1] && amountMatchResult[2]) {
-                    const eurStr = amountMatchResult[1]; // This can be numbers or "-------"
-                    const ctStr = amountMatchResult[2];  // This can be numbers or "--"
+                    const eurStr = amountMatchResult[1]; // 
+                    const ctStr = amountMatchResult[2];  // 
                     
-                    // Check if the extracted EUR string is a placeholder BEFORE parsing
                     if (eurStr.trim().startsWith('-')) {
                         console.log(`PLACEHOLDER DETECTED for Category='${mappedCategory}', Keyword='${keywordPhrase}' (Raw EUR: '${eurStr}', Raw Ct: '${ctStr}') - IGNORING.`);
-                        // Do NOT add to itemsMap, effectively ignoring it
                     } else {
-                        // Only parse if eurStr is not a placeholder
                         const amount = parseGermanAmount(eurStr, ctStr);
                         if (amount > 0 || mappedCategory.toLowerCase().includes('gross salary')) {
                             console.log(`SUCCESS: Category='${mappedCategory}', Keyword='${keywordPhrase}', Amount=${amount} (Raw EUR: '${eurStr}', Raw Ct: '${ctStr}')`);
                             itemsMap.set(mappedCategory, (itemsMap.get(mappedCategory) || 0) + amount);
                         } else {
-                            // Amount was parsed to 0 from actual numbers (e.g., "0 00") and not Gross Salary
                             console.log(`INFO: Category='${mappedCategory}', Keyword='${keywordPhrase}', Amount parsed to 0 from numbers (Raw EUR: '${eurStr}', Raw Ct: '${ctStr}') - IGNORING.`);
                         }
                     }
                 } else {
-                    // This means amountPairRegex didn't find a match in the window.
-                    // This is expected for lines where amounts are blank or too far.
                     console.log(`INFO: Keyword='${keywordPhrase}' found, but no EUR/Ct pair (numeric or placeholder) found by regex in its search window: "${textToSearchForAmount.substring(0, Math.min(textToSearchForAmount.length, 70))}..."`);
                 }
             } else {
@@ -131,16 +116,14 @@ async function parseLohnsteuerbescheinigung(pdfContent: ArrayBuffer): Promise<Pa
 
     } catch (error: any) {
         console.error("Error during Lohnsteuerbescheinigung parsing:", error);
-        // Specific error handling
         if (error.name === 'PasswordException') throw new Error('The PDF is password protected.');
         if (error.name === 'InvalidPDFException') throw new Error('The PDF file is invalid or corrupted.');
-        // Generic re-throw
         throw new Error(`Failed to process PDF: ${error.message || 'Unknown PDF processing error'}`);
     }
 }
 
 
-// Dummy function for UI testing if needed (not primary focus now)
+// Dummy function for UI testing if needed
 async function parsePdfDummy(_pdfContent: ArrayBuffer): Promise<PayslipItem[]> {
     console.log("parsePdfDummy called. Returning hardcoded test data...");
     await new Promise(resolve => setTimeout(resolve, 500));
@@ -158,7 +141,7 @@ export async function parsePayslip(
     fileType: string
 ): Promise<PayslipItem[]> {
 
-    const USE_REAL_PARSER = true; // Switch to true to use your actual Lohnsteuerbescheinigung parser
+    const USE_REAL_PARSER = true; // test function or real parser
 
     console.log(`parsePayslip called. FileType: ${fileType}. Using ${USE_REAL_PARSER ? 'REAL' : 'DUMMY'} parser.`);
 
@@ -172,6 +155,6 @@ export async function parsePayslip(
         }
     } else {
         console.warn(`parsePayslip: Received unexpected content type: ${typeof fileContents}. Returning empty array.`);
-        return []; // Or throw new Error for unsupported types
+        return [];
     }
 }
