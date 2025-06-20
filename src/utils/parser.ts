@@ -15,6 +15,7 @@ const categoryMapping: { [key: string]: string } = {
     '5. Einbehaltener Solidaritätszuschlag von 3.': 'Solidarity Surcharge', 
     '6. Einbehaltene Kirchensteuer des Arbeitnehmers von 3.': 'Church Tax', 
     '22. Arbeitgeber- Anteil/ -Zuschuss a) zur gesetzlichen Rentenversicherung': 'Employer Pension Contribution', 
+    '17. Steuerfreie Arbeitgeberleistungen, die auf die Entfernungspauschale anzurechnen sind': 'Tax-Free Travel Allowance',
     '23. Arbeitnehmer- anteil a) zur gesetzlichen Rentenversicherung': 'Pension Insurance', 
     '25. Arbeitnehmerbeiträge zur gesetzlichen Krankenversicherung': 'Health Insurance',
     '26. Arbeitnehmerbeiträge zur sozialen Pflegeversicherung': 'Nursing Care Insurance', 
@@ -42,9 +43,8 @@ function parseGermanAmount(eurString: string | undefined, ctString: string | und
     }
 }
 
-/**
- * Parses the Lohnsteuerbescheinigung PDF content.
- */
+
+//Parses the Lohnsteuerbescheinigung PDF content.
 async function parseLohnsteuerbescheinigung(pdfContent: ArrayBuffer): Promise<PayslipItem[]> {
     console.log("--- parseLohnsteuerbescheinigung: Starting String-Based Parsing ---");
     const itemsMap = new Map<string, number>();
@@ -52,8 +52,6 @@ async function parseLohnsteuerbescheinigung(pdfContent: ArrayBuffer): Promise<Pa
     try {
         const loadingTask = getDocument({ data: pdfContent });
         const pdf = await loadingTask.promise;
-        console.log(`parseLohnsteuerbescheinigung: PDF Loaded - ${pdf.numPages} page(s).`);
-
         let fullText = '';
         for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
@@ -63,58 +61,63 @@ async function parseLohnsteuerbescheinigung(pdfContent: ArrayBuffer): Promise<Pa
                 fullText += ' PAGE_BREAK ';
             }
         }
-        fullText = fullText.replace(/\s+/g, ' ').trim(); 
+        fullText = fullText.replace(/\s+/g, ' ').trim();
 
         console.log("--- parseLohnsteuerbescheinigung: EXTRACTED PDF TEXT (Normalized Single Line) ---");
-        console.log(fullText); // Log the entire fullText for debugging
+        console.log(fullText);
         console.log("---------------------------------------------------------------------------------");
 
-        const amountPairRegex = /((?:\d{1,3}(?:\.\d{3})*|\d+)|-{3,})\s+((?:\d{1,2})|-{2})\b/;
+        const amountOrPlaceholderRegex = /((?:\d[\d\.]*|\d+)|-{3,})\s+((?:\d{1,2})|-{2})\b/;
+
 
         for (const [keywordPhrase, mappedCategory] of Object.entries(categoryMapping)) {
             const escapedKeyword = keywordPhrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             const keywordRegex = new RegExp(escapedKeyword.replace(/\s+/g, '\\s+'), 'i');
-
-            const keywordMatchResult = keywordRegex.exec(fullText); // Search for keyword in fullText
+            const keywordMatchResult = keywordRegex.exec(fullText);
 
             if (keywordMatchResult) {
                 const keywordEndIndex = keywordMatchResult.index + keywordMatchResult[0].length;
-                const MAX_CHARS_TO_SEARCH_FOR_AMOUNT = 60; // Tunable: how far to look for amount
+                const MAX_CHARS_TO_SEARCH_FOR_AMOUNT = 60;
                 const textToSearchForAmount = fullText.substring(keywordEndIndex, keywordEndIndex + MAX_CHARS_TO_SEARCH_FOR_AMOUNT);
 
-                console.log(`Found Keyword "${keywordPhrase}". Searching for amount in window [${keywordEndIndex}-${keywordEndIndex + MAX_CHARS_TO_SEARCH_FOR_AMOUNT}]: "${textToSearchForAmount.substring(0, Math.min(textToSearchForAmount.length, 70))}..."`);
+                console.log(`Found Keyword "${keywordPhrase}". Searching in window: "${textToSearchForAmount.substring(0, 70)}..."`);
 
-                const amountMatchResult = amountPairRegex.exec(textToSearchForAmount); 
+                const matchResult = amountOrPlaceholderRegex.exec(textToSearchForAmount);
 
-                if (amountMatchResult && amountMatchResult[1] && amountMatchResult[2]) {
-                    const eurStr = amountMatchResult[1]; // 
-                    const ctStr = amountMatchResult[2];  // 
-                    
-                    if (eurStr.trim().startsWith('-')) {
-                        console.log(`PLACEHOLDER DETECTED for Category='${mappedCategory}', Keyword='${keywordPhrase}' (Raw EUR: '${eurStr}', Raw Ct: '${ctStr}') - IGNORING.`);
+                if (matchResult && matchResult[1] && matchResult[2]) {
+                    const eurStr = matchResult[1].trim();
+                    const ctStr = matchResult[2].trim();
+
+                    if (eurStr.startsWith('-')) { // Check if it's a placeholder
+                        console.log(`PLACEHOLDER DETECTED for Category='${mappedCategory}' (Raw EUR: '${eurStr}', Raw Ct: '${ctStr}') - IGNORING.`);
+
                     } else {
+
                         const amount = parseGermanAmount(eurStr, ctStr);
                         if (amount > 0 || mappedCategory.toLowerCase().includes('gross salary')) {
-                            console.log(`SUCCESS: Category='${mappedCategory}', Keyword='${keywordPhrase}', Amount=${amount} (Raw EUR: '${eurStr}', Raw Ct: '${ctStr}')`);
+                            console.log(`SUCCESS: Category='${mappedCategory}', Amount=${amount} (Raw EUR: '${eurStr}', Raw Ct: '${ctStr}')`);
                             itemsMap.set(mappedCategory, (itemsMap.get(mappedCategory) || 0) + amount);
                         } else {
-                            console.log(`INFO: Category='${mappedCategory}', Keyword='${keywordPhrase}', Amount parsed to 0 from numbers (Raw EUR: '${eurStr}', Raw Ct: '${ctStr}') - IGNORING.`);
+                            console.log(`INFO: Category='${mappedCategory}', Amount parsed to 0 from numbers (Raw EUR: '${eurStr}', Raw Ct: '${ctStr}') - IGNORING.`);
                         }
                     }
                 } else {
-                    console.log(`INFO: Keyword='${keywordPhrase}' found, but no EUR/Ct pair (numeric or placeholder) found by regex in its search window: "${textToSearchForAmount.substring(0, Math.min(textToSearchForAmount.length, 70))}..."`);
+                    console.log(`INFO: Keyword='${keywordPhrase}' found, but NO amount OR placeholder pattern matched by regex in window: "${textToSearchForAmount.substring(0, 70)}..."`);
+                    console.log(`   Window content for failed regex match on "${keywordPhrase}": >${textToSearchForAmount}<`);
                 }
             } else {
                 console.log(`Keyword "${keywordPhrase}" NOT FOUND in fullText.`);
             }
         }
 
+        // ... (rest of function)
         if (itemsMap.size === 0) {
-            console.warn("parseLohnsteuerbescheinigung: No valid numerical items extracted. Review extracted text, category mappings, and regex logic.");
+            console.warn("parseLohnsteuerbescheinigung: No valid numerical items extracted...");
         }
         return Array.from(itemsMap, ([category, amount]) => ({ category, amount }));
 
     } catch (error: any) {
+        // ... (error handling)
         console.error("Error during Lohnsteuerbescheinigung parsing:", error);
         if (error.name === 'PasswordException') throw new Error('The PDF is password protected.');
         if (error.name === 'InvalidPDFException') throw new Error('The PDF file is invalid or corrupted.');
@@ -122,16 +125,14 @@ async function parseLohnsteuerbescheinigung(pdfContent: ArrayBuffer): Promise<Pa
     }
 }
 
-
-// Dummy function for UI testing if needed
+// Dummy function (for UI testing purposes)
 async function parsePdfDummy(_pdfContent: ArrayBuffer): Promise<PayslipItem[]> {
-    console.log("parsePdfDummy called. Returning hardcoded test data...");
+    console.log("parsePdfDummy called...");
     await new Promise(resolve => setTimeout(resolve, 500));
     const dummyData: PayslipItem[] = [
-        { category: 'Income Tax (Test)', amount: 1000 },
-        { category: 'Health Insurance (Test)', amount: 300 },
+        { category: 'Dummy Income Tax', amount: 120.50 },
+        { category: 'Dummy Health Ins.', amount: 80.75 },
     ];
-    console.log("parsePdfDummy: Successfully returning dummy data:", dummyData);
     return dummyData;
 }
 
@@ -141,7 +142,7 @@ export async function parsePayslip(
     fileType: string
 ): Promise<PayslipItem[]> {
 
-    const USE_REAL_PARSER = true; // test function or real parser
+    const USE_REAL_PARSER = true; // Set to true to use the Lohnsteuerbescheinigung parser
 
     console.log(`parsePayslip called. FileType: ${fileType}. Using ${USE_REAL_PARSER ? 'REAL' : 'DUMMY'} parser.`);
 
