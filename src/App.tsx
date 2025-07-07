@@ -2,6 +2,7 @@ import React, { useState, useCallback } from "react";
 import UploadArea from "./components/UploadArea";
 import PieChartDisplay from "./components/PieChartDisplay";
 import { PayslipItem } from "./utils/parser";
+import ExplanationBox from "./components/ExplanationBox";
 
 const App: React.FC = () => {
   const [payslipData, setPayslipData] = useState<PayslipItem[]>([]);
@@ -12,7 +13,7 @@ const App: React.FC = () => {
     console.log("Parsed Data:", data);
     if (data.length === 0) {
       setError(
-        "Could not parse relevant data from the file. Please check the file format and content, ensuring standard German payslip terms are present."
+        "The application couldn't find recognizable financial data in this PDF. This can happen if the document is a scanned image or has a very unusual format. Please try another text-based payslip document."
       );
       setPayslipData([]);
     } else {
@@ -40,9 +41,7 @@ const App: React.FC = () => {
       {/* Use className for app container */}
       <header>
         <h1>German Payslip Analyzer</h1>
-        <p>
-          Upload your payslip (PDF or CSV) to see a breakdown of deductions.
-        </p>
+        <p>Upload your payslip (PDF Only) to see a breakdown of deductions.</p>
       </header>
       <UploadArea onDataParsed={handleDataParsed} onError={handleParseError} />
       {error && (
@@ -55,17 +54,15 @@ const App: React.FC = () => {
       {payslipData.length > 0 && fileName && (
         <div className="analysis-section">
           {" "}
-          {/* Optional: class for this section */}
           <h2>Analysis for: {fileName}</h2>
           <PieChartDisplay items={payslipData} />
+          <ExplanationBox items={payslipData} />
         </div>
       )}
       {payslipData.length === 0 && !error && (
         <p className="placeholder-text">
           {" "}
-          {/* Use className for placeholder */}
-          Upload a payslip PDF or CSV file to begin analysis (Upload any pdf
-          file this is a test version).
+          Upload a payslip PDF to begin analysis.
         </p>
       )}
     </div>

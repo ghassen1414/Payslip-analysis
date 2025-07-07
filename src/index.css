@@ -277,3 +277,44 @@
       padding: var(--spacing-md);
     }
   }
+  .explanation-container {
+  margin-top: var(--spacing-xl);
+  padding: var(--spacing-lg);
+  background-color: var(--white-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.explanation-container h2 {
+  margin-top: 0;
+  text-align: center;
+}
+
+.explanation-list {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.explanation-item {
+  padding: var(--spacing-md) 0;
+  border-bottom: 1px solid var(--medium-gray);
+}
+
+.explanation-item:last-child {
+  border-bottom: none;
+}
+
+.explanation-category {
+  display: block;
+  font-size: 1.1rem;
+  margin-bottom: var(--spacing-xs);
+  color: var(--dark-gray);
+}
+
+.explanation-text {
+  font-size: 0.95rem;
+  color: var(--secondary-color);
+  margin-bottom: 0;
+  line-height: 1.5;
+}

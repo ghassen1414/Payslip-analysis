@@ -10,17 +10,29 @@ export interface PayslipItem {
 
 
 const categoryMapping: { [key: string]: string } = {
-    '3. Bruttoarbeitslohn einschl. Sachbezüge': 'Gross Salary',
+    '3. Bruttoarbeitslohn einschl. Sachbezüge': 'Gross Income',
     '4. Einbehaltene Lohnsteuer von 3.': 'Income Tax',
-    '5. Einbehaltener Solidaritätszuschlag von 3.': 'Solidarity Surcharge', 
-    '6. Einbehaltene Kirchensteuer des Arbeitnehmers von 3.': 'Church Tax', 
-    '22. Arbeitgeber- Anteil/ -Zuschuss a) zur gesetzlichen Rentenversicherung': 'Employer Pension Contribution', 
-    '17. Steuerfreie Arbeitgeberleistungen, die auf die Entfernungspauschale anzurechnen sind': 'Tax-Free Travel Allowance',
-    '23. Arbeitnehmer- anteil a) zur gesetzlichen Rentenversicherung': 'Pension Insurance', 
+    '5. Einbehaltener Solidaritätszuschlag von 3.': 'Solidarity Surcharge',
+    '6. Einbehaltene Kirchensteuer des Arbeitnehmers von 3.': 'Church Tax',
+    '22. Arbeitgeber- Anteil/ -Zuschuss a) zur gesetzlichen Rentenversicherung': 'Employer Pension Contribution',
+    '23. Arbeitnehmer- anteil a) zur gesetzlichen Rentenversicherung': 'Pension Insurance',
     '25. Arbeitnehmerbeiträge zur gesetzlichen Krankenversicherung': 'Health Insurance',
-    '26. Arbeitnehmerbeiträge zur sozialen Pflegeversicherung': 'Nursing Care Insurance', 
-    '27. Arbeitnehmerbeiträge zur Arbeitslosenversicherung': 'Unemployment Insurance', 
-    '28. Beiträge zur privaten Kranken- und Pflege-Pflicht- versicherung oder Mindestvorsorgepauschale': 'Private Health/Nursing Insurance',
+    '26. Arbeitnehmerbeiträge zur sozialen Pflegeversicherung': 'Nursing Care Insurance',
+    '27. Arbeitnehmerbeiträge zur Arbeitslosenversicherung': 'Unemployment Insurance',
+    '28. Beiträge zur privaten Kranken- und Pflege-Pflicht- versicherung oder Mindestvorsorgepauschale': 'Private Health and Nursing Insurance',
+    '17. Steuerfreie Arbeitgeberleistungen, die auf die Entfernungspauschale anzurechnen sind': 'Tax-Free Employer Contributions for Commuting',
+    '18. Pauschal mit 15 % besteuerte Arbeitgeberleistungen für Fahrten zwischen Wohnung und erster Tätigkeitsstätte': 'Flat-Taxed Commuting Benefits (15%)',
+    '20. Steuerfreie Verpflegungszuschüsse bei Auswärtstätigkeit': 'Tax-Free Meal Allowance',
+    '21. Steuerfreie Arbeitgeberleistungen bei doppelter Haushaltsführung': 'Tax-Free Employer Contributions for Double Households',
+    '24. Steuerfreie Arbeitgeber- zuschüsse a) zur gesetzlichen Krankenversicherung': 'Employer Subsidy to Public Health Insurance',
+    '24. Steuerfreie Arbeitgeber- zuschüsse b) zur privaten Krankenversicherung': 'Employer Subsidy to Private Health Insurance',
+    '24. Steuerfreie Arbeitgeber- zuschüsse c) zur gesetzlichen Pflegeversicherung': 'Employer Subsidy to Long-Term Care Insurance',
+    '8. In 3. enthaltene Versorgungsbezüge': 'Pension Payments (Versorgungsbezüge)',
+    '15. Leistungen, die dem Progressionsvorbehalt unterliegen (z.B. Lohnersatzleistungen)': 'Substitute Wage Payments (Lohnersatzleistungen)',
+    '16. Steuerfreier Arbeitslohn nach a) Doppelbesteuerungsabkommen': 'Tax-Free Income under Double Taxation Agreement',
+    '10. Arbeitslohn für mehrere Kalenderjahre, Entschädi-, gungen z.B. Abfindungen (in 3. enthalten, ohne 9.)': 'Multi-Year Pension or Severance Pay',
+    '32. Sterbegeld; Kapitalauszahlungen/Abfindungen und Nachzahlungen von Versorgungsbezügen': 'Death Benefits / Capital Payments / Pension Back Payments',
+    '34. Freibetrag DBA Türkei': 'DBA Turkey Exemption',
 };
 
 function parseGermanAmount(eurString: string | undefined, ctString: string | undefined): number {

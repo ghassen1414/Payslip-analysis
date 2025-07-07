@@ -86,7 +86,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onDataParsed, onError }) => {
     <div className="upload-area-container">
       {" "}
       {/* Use className */}
-      <label htmlFor="payslip-upload">Select Payslip File (.pdf, .csv)</label>
+      <label htmlFor="payslip-upload">Select Payslip File (.pdf only)</label>
       <input
         ref={fileInputRef}
         id="payslip-upload"
